@@ -38,10 +38,10 @@ VALUES
 insert into producto (nombre, precio, categoria, stock, proveedor_id, color)
 VALUES
   ('MacBook Pro', 2799900, 'Computadoras', 100, 1, 'Plateado'),
-  ('iPhone 13', 1299900, 'Teléfonos inteligentes', 50, 2, 'Negro'),
+  ('iPhone 13', 1299900, 'Teléfonos inteligentes', 50, 2, 'Blanco'),
   ('Samsung Galaxy S21', 1199900, 'Teléfonos inteligentes', 200, 3, 'Gris'),
   ('PlayStation 5', 799900, 'Videojuegos', 75, 4, 'Blanco'),
-  ('Samsung Note 10', 1299900, 'Teléfonos inteligentes', 200, 3, 'Negro'),
+  ('Samsung Note 10', 1299900, 'Teléfonos inteligentes', 200, 3, 'Blanco'),
   ('Sony Bravia 4K TV', 3999900, 'Televisores', 30, 3, 'Negro'),
   ('Bose QuietComfort', 349990, 'Auriculares', 90, 1, 'Negro'),
   ('Canon EOS R5', 4999900, 'Cámaras', 60, 5, 'Negro'),
@@ -70,11 +70,17 @@ select *
 from producto 
 where stock = (select max(stock) from producto);
 -- color mas comun de productos
-select color, count(*) as cantidad 
-from producto 
-group by color 
-order by cantidad desc 
-limit 1;
+select color, count(*) as cantidad
+from producto
+group by color
+having count(*) = (
+    select max(cantidad)
+    from (
+        select count(*) as cantidad
+        from producto
+        group by color
+    ) as cantidades
+);
 -- proveedor con menor stock de productos
 select proveedor.empresa, sum(producto.stock) as stock_total 
 from proveedor 
