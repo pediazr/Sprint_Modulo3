@@ -60,11 +60,17 @@ values
 commit;  -- se confirman los cambios en la transaccion
 
 -- categoria de producto que mas se repite
-select categoria, count(*) as cantidad 
-from producto 
-group by categoria 
-order by cantidad desc 
-limit 1;
+select categoria, count(*) as cantidad
+from producto
+group by categoria
+having count(*) = (
+    select max(cantidad)
+    from (
+        select count(*) as cantidad
+        from producto
+        group by categoria
+    ) as cantidades
+);
 -- productos con mayor stock
 select * 
 from producto 
@@ -83,11 +89,18 @@ having count(*) = (
 );
 -- proveedor con menor stock de productos
 select proveedor.empresa, sum(producto.stock) as stock_total 
-from proveedor 
+from proveedor
 join producto on proveedor.proveedor_id = producto.proveedor_id 
 group by proveedor.empresa 
-order by stock_total asc 
-limit 1;
+having sum(producto.stock) = (
+    select min(stock_total)
+    from (
+        select sum(producto.stock) as stock_total
+        from proveedor
+        join producto on proveedor.proveedor_id = producto.proveedor_id 
+		group by proveedor.empresa 
+    ) as cantidades
+);
 
 -- cambiar la categoría de productos más popular por "Electrónica y computación"
 
